@@ -1,11 +1,10 @@
 #include "Failas.h"
-#include "Uzklausos.h"
+#include "Studentas.h"
 
 void failuKurimas(vector <int>& v1, int& ndKiek)
 {
     string failoPav;
     double pazymys;
-    std::stringstream ss;
     for (int i = 0; i < (v1.size()); i++)
     {
         auto start = std::chrono::high_resolution_clock::now();
@@ -13,28 +12,28 @@ void failuKurimas(vector <int>& v1, int& ndKiek)
 
         ofstream isvedimas(failoPav);
 
-        ss << setw(20) << left << "Pavarde" << setw(20) << left << "Vardas";
+        isvedimas << setw(20) << left << "Pavarde" << setw(20) << left << "Vardas";
 
         for (int j = 0; j < ndKiek; j++)
         {
-            ss << setw(10) << left << "Nd" + to_string(j + 1);
+            isvedimas << setw(10) << left << "Nd" + to_string(j + 1);
         }
 
-        ss << setw(10) << left << "Egzaminas" << endl;
+        isvedimas << setw(10) << left << "Egzaminas" << endl;
         srand(time(NULL));
 
         for (int k = 0; k < v1.at(i); k++)
         {
-            ss << setw(20) << left << "Pavarde" + to_string(k + 1) << setw(20) << left << "Vardas" + to_string(k + 1);
+            isvedimas << setw(20) << left << "Pavarde" + to_string(k + 1) << setw(20) << left << "Vardas" + to_string(k + 1);
             for (int kk = 0; kk < ndKiek; kk++)
             {
                 pazymys = rand() % 10 + 1;
-                ss << setw(10) << left << pazymys;
+                isvedimas << setw(10) << left << pazymys;
             }
             pazymys = rand() % 10 + 1;
-            ss << setw(10) << left << pazymys << endl;
+            isvedimas << setw(10) << left << pazymys << endl;
         }
-        isvedimas << ss.str();
+
         isvedimas.close();
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -69,10 +68,6 @@ void darbasSuFailu_nr1(vector <int>& v1, char& atsakymas)
         spausdinimas(v1.at(i), atsakymas, protingi, laikas, pavP);
         spausdinimas(v1.at(i), atsakymas, tinginiai, laikas, pavT);
 
-        grupe1.clear();
-        protingi.clear();
-        tinginiai.clear();
-
         int vieta = 0;
 
         cout << v1.at(i) << " studentu failo nuskaitymas truko: " << laikas.at(vieta) << " s" << endl;
@@ -85,6 +80,9 @@ void darbasSuFailu_nr1(vector <int>& v1, char& atsakymas)
         cout << "\n";
 
         laikas.clear();
+        grupe1.clear();
+        protingi.clear();
+        tinginiai.clear();
     }
 }
 
@@ -101,9 +99,9 @@ void darbasSuFailu(vector <int>& v1, char& atsakymas)
     cout << setw(46) << left << "| Atliktas darbas " << setw(25) << left << "| Laikas (s) su vektoriu " << "|" << endl;
     cout << "------------------------------------------------------------------------" << endl;
 
-    for (int i = 0; i < (v1.size()); i++)
+    for (int i = 0; i < (v1.size()-1); i++)
     {
-        laikas_vector.reserve(3);
+        laikas_vector.reserve(4);
 
         auto start = std::chrono::high_resolution_clock::now();
         failoNuskaitymas(grupe_vector, v1.at(i));
@@ -116,7 +114,7 @@ void darbasSuFailu(vector <int>& v1, char& atsakymas)
         cout << "| " << v1.at(i) << setw(vieta) << " studentu nuskaitymas " << "| " << setw(23) << left << laikas_vector.at(0) << "| " << endl;
         cout << "------------------------------------------------------------------------" << endl;
 
-        rusiavimas_strategija2(grupe_vector, tinginiai_vector, laikas_vector, atsakymas);
+        rusiavimas_strategija_nr2(grupe_vector, tinginiai_vector, laikas_vector, atsakymas);
 
         cout << "| " << v1.at(i) << setw(vieta) << " studentu surusiavimas 2 strategija " << "| " << setw(23) << left << laikas_vector.at(1) << "| " << endl;
         cout << "------------------------------------------------------------------------" << endl;
@@ -134,12 +132,13 @@ void darbasSuFailu(vector <int>& v1, char& atsakymas)
 void failas()
 {
     char ats;
-    int eilSk = 0, zodziuSk = 0;
+    string sLine, vardas, pavarde;
+    int eilSk = 0;
     vector <Studentas> grupe1;
     Studentas stu;
-    string word, vardas, pavarde, sLine;
-    double temp, egzaminas;
-    std::stringstream ss;
+    int zodziuSk = 0;
+    string word;
+    double temp, egz;
 
     ifstream indata("kursiokai.txt");
 
@@ -150,14 +149,14 @@ void failas()
 
     ats = uzklausa_delAtsakymo();
 
-    ss << indata.rdbuf();
-
     while (true)
     {
         if (!indata.eof())
         {
             getline(indata, sLine);
+
             eilSk++;
+
             if (eilSk == 1)
             {
 
@@ -168,19 +167,18 @@ void failas()
                 }
             }
 
-            ss >> vardas >> pavarde;
-
+            indata >> vardas >> pavarde;
             stu.SetVardasPavarde(vardas, pavarde);
 
             stu.NdReserve(zodziuSk - 3);
 
             for (int i = 0; i < zodziuSk - 3; i++)
             {
-                ss >> temp;
+                indata >> temp;
                 stu.NdIdeti(temp);
             }
-            ss >> egzaminas;
-            stu.SetEgzaminas(egzaminas);
+            indata >> egz;
+            stu.SetEgzaminas(egz);
 
             stu.SetGalutinisVidurkis();
             stu.SetGalutinisMediana();
@@ -191,12 +189,14 @@ void failas()
         }
         else break;
     }
+    sort(grupe1.begin(), grupe1.end(), PalygintiPav);
+
     indata.close();
 
-    sort(grupe1.begin(), grupe1.end(), [](Studentas a, Studentas b)
-        {
-            return a.GautiPavarde() < b.GautiPavarde();
-        });
-
     spausdinimas(ats, grupe1);
+
+}
+bool PalygintiPav(Studentas& stu1, Studentas& stu2)
+{
+    return stu1.GautiPavarde() < stu2.GautiPavarde();
 }

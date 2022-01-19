@@ -1,4 +1,6 @@
 #pragma once
+#include "Antraste.h"
+#include "Studentas.h"
 #include "Patikrinimas.h"
 
 char uzklausa_delFailuGeneravimo();
